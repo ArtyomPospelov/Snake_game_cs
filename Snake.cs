@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 
 namespace Snake
@@ -40,7 +41,7 @@ namespace Snake
         public static void Main()
         {
             //variables and init:
-            Random rand = new Random();
+            Random rand = new();
             PointSize fieldSize = new PointSize(15, 15);
             PointSize[] snakeBody = new PointSize[1];
             snakeBody[0].x = fieldSize.x / 2;
@@ -54,9 +55,12 @@ namespace Snake
             //style variables:
             ConsoleColor statBarBg = ConsoleColor.DarkBlue;
             ConsoleColor statBarFg = ConsoleColor.White;
-            ConsoleColor fieldColor = ConsoleColor.DarkGreen;
-            ConsoleColor pickupColor = ConsoleColor.Red;
-            ConsoleColor snakeColor = ConsoleColor.Yellow;
+            ConsoleColor fieldBg = ConsoleColor.DarkGreen;
+            ConsoleColor fieldFg = ConsoleColor.Green;
+            ConsoleColor pickupBg = ConsoleColor.Red;
+            ConsoleColor pickupFg = ConsoleColor.Black;
+            ConsoleColor snakeBg = ConsoleColor.Yellow;
+            ConsoleColor snakeFg = ConsoleColor.Black;
 
             //game loop:
             while (!isGameOver)
@@ -154,7 +158,17 @@ namespace Snake
 
                 Console.BackgroundColor = statBarBg;
                 Console.ForegroundColor = statBarFg;
-                Console.WriteLine("Score: {0}", score);
+
+                //print score:
+                {
+                    //fieldSize.x * 2 because console cell has 1x2 size.
+                    string scoreStr = $"Score: { score }";
+                    int scoreAddSpaces = (fieldSize.x * 2) - scoreStr.Length;
+                    Console.Write(scoreStr);
+                    for (int i = 0; i < scoreAddSpaces; ++i)
+                        Console.Write(' ');
+                    Console.WriteLine();
+                }
 
                 for (int row = 0; row < fieldSize.y; ++row)
                 {
@@ -162,18 +176,37 @@ namespace Snake
                     {
                         if (snakeBody.Any(coord => (coord.x == col) && (coord.y == row)))
                         {
-                            Console.BackgroundColor = snakeColor;
+                            Console.BackgroundColor = snakeBg;
+                            Console.ForegroundColor = snakeFg;
+                            PointSize snakeHead = snakeBody[0];
+                            if (snakeHead.x == col && snakeHead.y == row)
+                            {
+                                if (snakeDir == Direction.Left)
+                                    Console.Write(": ");
+                                else if (snakeDir == Direction.Up)
+                                    Console.Write("''");
+                                else if (snakeDir == Direction.Right)
+                                    Console.Write(" :");
+                                else if (snakeDir == Direction.Down)
+                                    Console.Write("..");
+                                else
+                                    Console.WriteLine("  ");
+                            }
+                            else
+                                Console.Write("xx");
                         }
                         else if ((col == pickupPos.x) && (row == pickupPos.y))
                         {
-                            Console.BackgroundColor = pickupColor;
+                            Console.BackgroundColor = pickupBg;
+                            Console.ForegroundColor = pickupFg;
+                            Console.Write("()");
                         }
                         else
                         {
-                            Console.BackgroundColor = fieldColor;
+                            Console.BackgroundColor = fieldBg;
+                            Console.ForegroundColor = fieldFg;
+                            Console.Write("//");
                         }
-
-                        Console.Write("  ");
                     }
 
                     Console.WriteLine();    
@@ -183,7 +216,7 @@ namespace Snake
                 Thread.Sleep(gameLoopDelay);
             }
 
-            Console.WriteLine("Game over. Your score is: {0} point(s)", score);
+            Console.WriteLine($"Game over. Your score is: { score } point(s)");
         }
     }
 }
